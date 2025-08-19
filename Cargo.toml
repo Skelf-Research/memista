@@ -2,25 +2,60 @@
 name = "memista"
 version = "0.1.0"
 edition = "2021"
+description = "High-performance vector search service"
+repository = "https://github.com/your-repo/memista"
+license = "GPL-3.0"
 
 [dependencies]
+# Web framework for building HTTP servers
 actix-web = "4.0"
+
+# HTTP client (not currently used but included as a dependency)
 reqwest = { version = "0.11", features = ["json"] }
+
+# Serialization/deserialization library
 serde = { version = "1.0", features = ["derive"] }
+
+# JSON handling
 serde_json = "1.0"
+
+# Futures for async programming
 futures = "0.3"
+
+# Error handling library
 anyhow = "1.0"
+
+# SHA-2 hash functions (not currently used but included as a dependency)
 sha2 = "0.10.6"
+
+# PyTorch bindings for Rust (not currently used but included as a dependency)
 tch = "0.10.1"
+
+# Runtime for async operations
 tokio = { version = "1.38.0", features = ["full"] }
+
+# Parallel processing library (not currently used but included as a dependency)
 rayon = "1.8"
+
+# Logging facade
 log = "0.4.6"
+
+# Logger implementation
 env_logger = "0.6.1"
+
+# High-performance vector search library
 usearch = { version = "2.12.0", features = ["simsimd", "fp16lib"] }
+
+# OpenAPI documentation generation
 apistos = { version="0.2", features = ["extras", "qs_query", "rapidoc", "redoc", "scalar", "swagger-ui"] }
+
+# JSON schema generation for API documentation
 schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
+
+# Async SQLite database interface
 async-sqlite = "0.2.2"
 
+# UUID generation
 [dependencies.uuid]
 version = "1.9.0"
 features = [

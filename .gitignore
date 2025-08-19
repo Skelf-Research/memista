@@ -2,3 +2,4 @@
 memista.*
 *.usearch
 .vscode
+*.env

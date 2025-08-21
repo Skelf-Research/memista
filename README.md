@@ -2,7 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/memista.svg)](https://crates.io/crates/memista)
 [![Documentation](https://docs.rs/memista/badge.svg)](https://docs.rs/memista)
-[![License](https://img.shields.io/crates/l/memista.svg)](https://github.com/your-repo/memista/blob/main/LICENSE)
+[![License](https://img.shields.io/crates/l/memista.svg)](https://github.com/sokratis-xyz/memista/blob/main/LICENSE)
 
 Memista is a high-performance vector search library that combines SQLite for metadata storage with USearch for efficient vector similarity search. It provides both a library interface for embedding in Rust applications and a standalone HTTP server.
 

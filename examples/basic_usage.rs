@@ -1,17 +1,24 @@
 //! Basic usage example of the Memista library
 //!
 //! This example demonstrates how to use Memista as a library in your own Rust application.
+//! It shows how to create a database pool, set up application state, and start the HTTP server.
 
-use memista::{AppState, Config};
+use memista::{AppState, Config, create_app};
 use async_sqlite::{PoolBuilder, JournalMode};
 use std::sync::Arc;
+use actix_web::HttpServer;
 
-#[tokio::main]
+#[actix_web::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Memista server...");
     
-    // Load configuration from environment variables or use defaults
-    let config = Config::from_env().expect("Failed to load configuration");
+    // Create a configuration with default values
+    let config = Config {
+        database_path: "memista_example.db".to_string(),
+        server_host: "127.0.0.1".to_string(),
+        server_port: 8084, // Use a different port to avoid conflicts
+        log_level: "info".to_string(),
+    };
     
     // Create a database pool
     let db_pool = PoolBuilder::new()
@@ -22,21 +29,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Failed to create database pool");
 
     // Create application state
-    let _app_state = Arc::new(AppState { db_pool });
+    let app_state = Arc::new(AppState { db_pool });
 
     // Start the HTTP server
     let bind_address = format!("{}:{}", config.server_host, config.server_port);
     println!("Server will be available at http://{}", bind_address);
     
-    // Note: In a real example, you would actually start the server.
-    // For this example, we'll just show how it would be done.
-    // HttpServer::new(move || {
-    //     create_app(app_state.clone())
-    // })
-    // .bind(bind_address)?
-    // .run()
-    // .await?;
+    // Start the server (this will block until the server is stopped)
+    println!("Starting server... Press Ctrl+C to stop.");
+    HttpServer::new(move || {
+        create_app(app_state.clone())
+    })
+    .bind(bind_address)?
+    .run()
+    .await?;
     
-    println!("Example completed successfully!");
+    println!("Server stopped.");
     Ok(())
 }

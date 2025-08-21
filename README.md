@@ -18,11 +18,39 @@ Memista is a high-performance vector search library that combines SQLite for met
 
 ## Installation
 
+### As a Library
+
 Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-memista = \"0.1\"
+memista = "0.1"
+```
+
+### As a CLI Application
+
+To install and run Memista as a standalone server:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/memista.git
+cd memista
+
+# Build and run the application
+cargo run
+
+# Or build and install it
+cargo build --release
+./target/release/memista
+```
+
+The server will start on `http://127.0.0.1:8083` by default.
+
+You can also install it directly from crates.io:
+
+```bash
+cargo install memista
+memista
 ```
 
 ## Library Usage
@@ -38,7 +66,7 @@ use std::sync::Arc;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a database pool
     let db_pool = PoolBuilder::new()
-        .path(\"memista.db\")
+        .path("memista.db")
         .journal_mode(JournalMode::Wal)
         .open()
         .await?;
@@ -48,11 +76,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Insert some data
     let insert_request = memista::InsertChunkRequest {
-        database_id: \"my_database\".to_string(),
+        database_id: "my_database".to_string(),
         chunks: vec![memista::ChunkData {
-            embedding: vec![0.1, 0.2],
-            text: \"Hello, world!\".to_string(),
-            metadata: \"{\\\"source\\\": \\\"example\\\"}\".to_string(),
+            embedding: vec![0.1, 2.0],
+            text: "Hello, world!".to_string(),
+            metadata: "{\"source\": \"example\"}".to_string(),
         }],
     };
 
@@ -74,7 +102,7 @@ use std::sync::Arc;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load configuration
-    let config = Config::from_env().expect(\"Failed to load configuration\");
+    let config = Config::from_env().expect("Failed to load configuration");
     
     // Create a database pool
     let db_pool = PoolBuilder::new()
@@ -82,13 +110,13 @@ async fn main() -> std::io::Result<()> {
         .journal_mode(JournalMode::Wal)
         .open()
         .await
-        .expect(\"Failed to create database pool\");
+        .expect("Failed to create database pool");
 
     // Create application state
     let app_state = Arc::new(AppState { db_pool });
 
     // Start the HTTP server
-    let bind_address = format!(\"{}:{}\", config.server_host, config.server_port);
+    let bind_address = format!("{}:{}", config.server_host, config.server_port);
     HttpServer::new(move || {
         create_app(app_state.clone())
     })
@@ -97,6 +125,23 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 ```
+
+### Examples
+
+The repository includes several examples demonstrating different ways to use Memista:
+
+1. **Basic Usage**: Shows how to start a Memista HTTP server (`examples/basic_usage.rs`)
+2. **Library Usage**: Demonstrates direct library usage without starting the HTTP server (`examples/library_usage.rs`)
+3. **Advanced Usage**: Shows a more realistic use case with text processing (`examples/advanced_usage.rs`)
+4. **HTTP Client**: Demonstrates how to interact with a running Memista server using Rust's HTTP client (`examples/http_client.rs`)
+
+To run any example:
+
+```bash
+cargo run --example example_name
+```
+
+See the [examples/README.md](examples/README.md) for more details on each example.
 
 ## HTTP API
 

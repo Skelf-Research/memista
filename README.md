@@ -1,7 +1,10 @@
+# Memista
 
-# Memista: High-Performance Vector Search Service
+[![Crates.io](https://img.shields.io/crates/v/memista.svg)](https://crates.io/crates/memista)
+[![Documentation](https://docs.rs/memista/badge.svg)](https://docs.rs/memista)
+[![License](https://img.shields.io/crates/l/memista.svg)](https://github.com/your-repo/memista/blob/main/LICENSE)
 
-Memista is a high-performance vector search service written in Rust that provides a simple HTTP API for storing and retrieving text chunks with their associated vector embeddings. It combines SQLite for metadata storage with USearch for efficient vector similarity search.
+Memista is a high-performance vector search library that combines SQLite for metadata storage with USearch for efficient vector similarity search. It provides both a library interface for embedding in Rust applications and a standalone HTTP server.
 
 ## Features
 
@@ -13,58 +16,138 @@ Memista is a high-performance vector search service written in Rust that provide
 - **Asynchronous I/O**: Built with async I/O for high performance and concurrency
 - **Memory Efficient**: Uses optimized data structures for efficient memory usage
 
-## Architecture
+## Installation
 
-Memista uses a dual-storage approach:
-- **SQLite**: Stores text chunks and their metadata with fast retrieval by ID
-- **USearch**: Maintains vector embeddings for efficient similarity search
+Add this to your `Cargo.toml`:
 
-Each database is isolated with its own SQLite table and USearch index file, enabling multi-tenancy.
+```toml
+[dependencies]
+memista = \"0.1\"
+```
 
-## API Endpoints
+## Library Usage
+
+### Basic Example
+
+```rust
+use memista::{AppState, Config, create_app, insert_chunk, search};
+use async_sqlite::{PoolBuilder, JournalMode};
+use std::sync::Arc;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a database pool
+    let db_pool = PoolBuilder::new()
+        .path(\"memista.db\")
+        .journal_mode(JournalMode::Wal)
+        .open()
+        .await?;
+
+    // Create application state
+    let app_state = Arc::new(AppState { db_pool });
+
+    // Insert some data
+    let insert_request = memista::InsertChunkRequest {
+        database_id: \"my_database\".to_string(),
+        chunks: vec![memista::ChunkData {
+            embedding: vec![0.1, 0.2],
+            text: \"Hello, world!\".to_string(),
+            metadata: \"{\\\"source\\\": \\\"example\\\"}\".to_string(),
+        }],
+    };
+
+    // You would typically call the insert_chunk function through the web API
+    // or integrate it directly into your application logic
+
+    Ok(())
+}
+```
+
+### Starting the HTTP Server
+
+```rust
+use memista::{AppState, Config, create_app};
+use async_sqlite::{PoolBuilder, JournalMode};
+use actix_web::HttpServer;
+use std::sync::Arc;
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    // Load configuration
+    let config = Config::from_env().expect(\"Failed to load configuration\");
+    
+    // Create a database pool
+    let db_pool = PoolBuilder::new()
+        .path(&config.database_path)
+        .journal_mode(JournalMode::Wal)
+        .open()
+        .await
+        .expect(\"Failed to create database pool\");
+
+    // Create application state
+    let app_state = Arc::new(AppState { db_pool });
+
+    // Start the HTTP server
+    let bind_address = format!(\"{}:{}\", config.server_host, config.server_port);
+    HttpServer::new(move || {
+        create_app(app_state.clone())
+    })
+    .bind(bind_address)?
+    .run()
+    .await
+}
+```
+
+## HTTP API
+
+Memista provides a RESTful HTTP API for vector search operations:
 
 ### POST /v1/insert
+
 Insert text chunks with their embeddings into a specified database.
 
-**Request Body**:
-```json
-{
-  "database_id": "string",
-  "chunks": [
-    {
-      "embedding": [0.1, 0.2, ...],
-      "text": "string",
-      "metadata": "string"
-    }
-  ]
-}
+```bash
+curl -X POST http://localhost:8083/v1/insert \
+  -H \"Content-Type: application/json\" \
+  -d '{
+    \"database_id\": \"my_db\",
+    \"chunks\": [{
+      \"embedding\": [0.1, 0.2],
+      \"text\": \"Sample text\",
+      \"metadata\": \"{\\\"source\\\": \\\"document1\\\"}\"
+    }]
+  }'
 ```
 
 ### POST /v1/search
+
 Search for similar chunks using vector embeddings.
 
-**Request Body**:
-```json
-{
-  "database_id": "string",
-  "embeddings": [[0.1, 0.2, ...]],
-  "num_results": 5
-}
+```bash
+curl -X POST http://localhost:8083/v1/search \
+  -H \"Content-Type: application/json\" \
+  -d '{
+    \"database_id\": \"my_db\",
+    \"embeddings\": [[0.1, 0.2]],
+    \"num_results\": 5
+  }'
 ```
 
 ### DELETE /v1/drop
+
 Drop a specific database and its associated vector index.
 
-**Request Body**:
-```json
-{
-  "database_id": "string"
-}
+```bash
+curl -X DELETE http://localhost:8083/v1/drop \
+  -H \"Content-Type: application/json\" \
+  -d '{
+    \"database_id\": \"my_db\"
+  }'
 ```
 
 ## Configuration
 
-The service can be configured using environment variables. Create a `.env` file or set environment variables directly.
+The service can be configured using environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -73,99 +156,10 @@ The service can be configured using environment variables. Create a `.env` file 
 | `SERVER_PORT` | Port to listen on | `8083` |
 | `LOG_LEVEL` | Logging level (debug, info, warn, error) | `info` |
 
-## Quick Start
+## Documentation
 
-1. Install Rust and Cargo:
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
-
-2. Clone this repository:
-   ```bash
-   git clone <repository-url>
-   cd memista
-   ```
-
-3. Create a `.env` file with your configuration (optional):
-   ```bash
-   cp sample.env .env
-   ```
-
-4. Check [BUILD_REQUIREMENTS.md](BUILD_REQUIREMENTS.md) for system dependencies
-
-5. Run the server:
-   ```bash
-   cargo run
-   ```
-
-The server will start and the API documentation will be available at:
-- Swagger UI: http://localhost:8083/swagger
-- Redoc: http://localhost:8083/redoc
-- RapiDoc: http://localhost:8083/rapidoc
-- OpenAPI JSON: http://localhost:8083/openapi.json
-
-## Testing
-
-A test script is provided to verify basic functionality:
-
-```bash
-# Start Memista in one terminal
-cargo run
-
-# Run the test script in another terminal
-./test_functionality.sh
-```
-
-## Example Usage
-
-### Insert Chunks
-
-```bash
-curl -X POST http://localhost:8083/v1/insert \
-  -H "Content-Type: application/json" \
-  -d '{
-    "database_id": "my_db",
-    "chunks": [{
-      "embedding": [0.1, 0.2],
-      "text": "Sample text",
-      "metadata": "{\"source\": \"document1\"}"
-    }]
-  }'
-```
-
-### Search Chunks
-
-```bash
-curl -X POST http://localhost:8083/v1/search \
-  -H "Content-Type: application/json" \
-  -d '{
-    "database_id": "my_db",
-    "embeddings": [[0.1, 0.2]],
-    "num_results": 5
-  }'
-```
-
-### Drop Database
-
-```bash
-curl -X DELETE http://localhost:8083/v1/drop \
-  -H "Content-Type: application/json" \
-  -d '{
-    "database_id": "my_db"
-  }'
-```
-
-## Dependencies
-
-The project uses several key dependencies:
-
-- **actix-web**: High-performance web framework
-- **usearch**: Ultra-fast vector similarity search library
-- **async-sqlite**: Async interface to SQLite
-- **apistos**: OpenAPI 3.0 documentation generation
-- **serde**: Serialization/deserialization framework
-
-For a complete list of dependencies with version information, see the [Cargo.toml](Cargo.toml) file.
+- [API Documentation](https://docs.rs/memista)
+- [Release Notes](UPDATES_SUMMARY.md)
 
 ## Performance Considerations
 
@@ -174,28 +168,10 @@ For a complete list of dependencies with version information, see the [Cargo.tom
 3. **Connection Pooling**: Uses connection pooling for efficient database access.
 4. **Async I/O**: Fully async implementation for high concurrency.
 
-## Benchmarking
-
-The `benchmarks/` directory contains scripts for benchmarking Memista's performance:
-
-- `insert_benchmark.sh`: Measures insert performance
-- `search_benchmark.sh`: Measures search performance
-- `concurrent_benchmark.sh`: Measures concurrent request handling
-- `run_all_benchmarks.sh`: Runs all benchmarks sequentially
-
-See the [benchmarks/README.md](benchmarks/README.md) for detailed instructions.
-
-## Documentation
-
-- [BUILD_REQUIREMENTS.md](BUILD_REQUIREMENTS.md): System requirements for building the project
-- [UPDATES_SUMMARY.md](UPDATES_SUMMARY.md): Summary of recent codebase updates
-- [benchmarks/README.md](benchmarks/README.md): Benchmarking suite documentation
-
 ## License
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See [LICENSE](LICENSE) for details.
 
-## Contact
+## Contributing
 
-support@sokratis.xyz
-
+Contributions are welcome! Please feel free to submit a Pull Request.

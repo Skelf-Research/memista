@@ -6,7 +6,7 @@
 <p align="center">
   <a href="https://crates.io/crates/memista"><img src="https://img.shields.io/crates/v/memista.svg" alt="Crates.io"></a>
   <a href="https://docs.rs/memista"><img src="https://docs.rs/memista/badge.svg" alt="Documentation"></a>
-  <a href="https://github.com/sokratis-xyz/memista/blob/main/LICENSE"><img src="https://img.shields.io/crates/l/memista.svg" alt="License"></a>
+  <a href="https://github.com/Skelf-Research/memista/blob/main/LICENSE"><img src="https://img.shields.io/crates/l/memista.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/rust-1.56+-orange.svg" alt="Rust Version">
   <img src="https://img.shields.io/badge/status-experimental-yellow.svg" alt="Status">
 </p>

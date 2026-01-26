@@ -1,15 +1,15 @@
 [package]
 name = "memista"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "High-performance vector search service with SQLite metadata storage and USearch vector indexing"
-repository = "https://github.com/sokratis-xyz/memista"
+repository = "https://github.com/Skelf-Research/memista"
 license = "GPL-3.0"
 keywords = ["vector", "search", "database", "embedding", "similarity"]
 categories = ["database", "algorithms", "asynchronous"]
 readme = "README.md"
 documentation = "https://docs.rs/memista"
-homepage = "https://github.com/sokratis-xyz/memista"
+homepage = "https://github.com/Skelf-Research/memista"
 authors = ["Dipankar Sarkar <me@dipankar.name>"]
 exclude = ["/target", "/benchmarks", "/scripts", "/documentation", "/tests", "/config"]
 

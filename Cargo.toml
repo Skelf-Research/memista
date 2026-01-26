@@ -11,7 +11,7 @@ readme = "README.md"
 documentation = "https://docs.rs/memista"
 homepage = "https://github.com/sokratis-xyz/memista"
 authors = ["Dipankar Sarkar <me@dipankar.name>"]
-exclude = ["/target", "/benchmarks", "test_functionality.sh"]
+exclude = ["/target", "/benchmarks", "/scripts", "/documentation", "/tests", "/config"]
 
 [lib]
 name = "memista"

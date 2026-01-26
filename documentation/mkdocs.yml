@@ -1,0 +1,104 @@
+site_name: Memista Documentation
+site_description: High-performance vector search library combining SQLite and USearch
+site_author: Dipankar Sarkar
+site_url: https://sokratis-xyz.github.io/memista/
+
+repo_name: sokratis-xyz/memista
+repo_url: https://github.com/sokratis-xyz/memista
+edit_uri: edit/main/documentation/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+  language: en
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - getting-started/index.md
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Build Requirements: getting-started/requirements.md
+  - User Guide:
+    - guide/index.md
+    - Configuration: guide/configuration.md
+    - Library Usage: guide/library-usage.md
+    - HTTP Server: guide/http-server.md
+  - API Reference:
+    - api/index.md
+    - HTTP Endpoints: api/endpoints.md
+    - Request/Response: api/request-response.md
+    - OpenAPI: api/openapi.md
+  - Examples:
+    - examples/index.md
+    - Basic Usage: examples/basic-usage.md
+    - Library Usage: examples/library-usage.md
+    - Advanced Usage: examples/advanced-usage.md
+    - HTTP Client: examples/http-client.md
+  - Benchmarking:
+    - benchmarking/index.md
+    - Running Benchmarks: benchmarking/running-benchmarks.md
+    - Interpreting Results: benchmarking/interpreting-results.md
+  - Reference:
+    - reference/index.md
+    - Data Structures: reference/data-structures.md
+    - Error Codes: reference/error-codes.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sokratis-xyz/memista
+
+copyright: Copyright &copy; 2025 Dipankar Sarkar - GPL-3.0 License

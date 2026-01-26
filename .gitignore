@@ -3,3 +3,8 @@ memista.*
 *.usearch
 .vscode
 *.env
+!config/sample.env
+!config/default.env
+
+# MkDocs build output
+documentation/site/

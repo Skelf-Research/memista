@@ -1,222 +1,171 @@
-# Memista
+<p align="center">
+  <h1 align="center">Memista</h1>
+  <p align="center">A lightweight vector search library for Rust</p>
+</p>
 
-[![Crates.io](https://img.shields.io/crates/v/memista.svg)](https://crates.io/crates/memista)
-[![Documentation](https://docs.rs/memista/badge.svg)](https://docs.rs/memista)
-[![License](https://img.shields.io/crates/l/memista.svg)](https://github.com/sokratis-xyz/memista/blob/main/LICENSE)
+<p align="center">
+  <a href="https://crates.io/crates/memista"><img src="https://img.shields.io/crates/v/memista.svg" alt="Crates.io"></a>
+  <a href="https://docs.rs/memista"><img src="https://docs.rs/memista/badge.svg" alt="Documentation"></a>
+  <a href="https://github.com/sokratis-xyz/memista/blob/main/LICENSE"><img src="https://img.shields.io/crates/l/memista.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/rust-1.56+-orange.svg" alt="Rust Version">
+  <img src="https://img.shields.io/badge/status-experimental-yellow.svg" alt="Status">
+</p>
 
-Memista is a high-performance vector search library that combines SQLite for metadata storage with USearch for efficient vector similarity search. It provides both a library interface for embedding in Rust applications and a standalone HTTP server.
+---
 
-## Features
+Memista combines **SQLite** for metadata storage with **USearch** for vector similarity search. It's designed for developers who need a simple, self-contained vector search solution without the complexity of dedicated vector databases.
 
-- **Fast Vector Similarity Search**: Utilizes USearch for high-performance similarity search
-- **Persistent Storage**: Stores text chunks and metadata in SQLite for durability
-- **Multi-Database Support**: Supports multiple isolated databases through `database_id` partitioning
-- **Comprehensive API Documentation**: Auto-generated OpenAPI documentation with Swagger, Redoc, and RapiDoc interfaces
-- **Environment-Based Configuration**: Easily configurable through environment variables
-- **Asynchronous I/O**: Built with async I/O for high performance and concurrency
-- **Memory Efficient**: Uses optimized data structures for efficient memory usage
+## Why Memista?
 
-## Installation
+- **Zero infrastructure** - Single binary, no external services required
+- **Familiar storage** - SQLite for metadata means easy debugging and backups
+- **Simple API** - REST endpoints that just work
+- **Rust library** - Embed directly in your application
+- **Multi-tenant ready** - Isolated databases via `database_id`
 
-### As a Library
+> **Note**: Memista is experimental and best suited for prototypes, small-to-medium datasets, and applications where simplicity matters more than scale.
 
-Add this to your `Cargo.toml`:
+## Quick Start
 
-```toml
-[dependencies]
-memista = "0.1"
-```
-
-### As a CLI Application
-
-To install and run Memista as a standalone server:
-
-```bash
-# Clone the repository
-git clone https://github.com/your-repo/memista.git
-cd memista
-
-# Build and run the application
-cargo run
-
-# Or build and install it
-cargo build --release
-./target/release/memista
-```
-
-The server will start on `http://127.0.0.1:8083` by default.
-
-You can also install it directly from crates.io:
+### Install & Run
 
 ```bash
 cargo install memista
 memista
 ```
 
-## Library Usage
+Server starts at `http://127.0.0.1:8083`
 
-### Basic Example
+### Store a vector
+
+```bash
+curl -X POST http://localhost:8083/v1/insert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "database_id": "my_app",
+    "chunks": [{
+      "embedding": [0.1, 0.2],
+      "text": "Hello world",
+      "metadata": "{\"source\": \"readme\"}"
+    }]
+  }'
+```
+
+### Search for similar vectors
+
+```bash
+curl -X POST http://localhost:8083/v1/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "database_id": "my_app",
+    "embeddings": [[0.1, 0.2]],
+    "num_results": 5
+  }'
+```
+
+## Use as a Library
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+memista = "0.1"
+```
 
 ```rust
-use memista::{AppState, Config, create_app, insert_chunk, search};
+use memista::{AppState, ChunkData, InsertChunkRequest};
 use async_sqlite::{PoolBuilder, JournalMode};
 use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a database pool
     let db_pool = PoolBuilder::new()
         .path("memista.db")
         .journal_mode(JournalMode::Wal)
         .open()
         .await?;
 
-    // Create application state
     let app_state = Arc::new(AppState { db_pool });
 
-    // Insert some data
-    let insert_request = memista::InsertChunkRequest {
-        database_id: "my_database".to_string(),
-        chunks: vec![memista::ChunkData {
-            embedding: vec![0.1, 2.0],
-            text: "Hello, world!".to_string(),
-            metadata: "{\"source\": \"example\"}".to_string(),
-        }],
-    };
-
-    // You would typically call the insert_chunk function through the web API
-    // or integrate it directly into your application logic
-
+    // Now use app_state with Memista's functions
     Ok(())
 }
 ```
 
-### Starting the HTTP Server
+## API Endpoints
 
-```rust
-use memista::{AppState, Config, create_app};
-use async_sqlite::{PoolBuilder, JournalMode};
-use actix_web::HttpServer;
-use std::sync::Arc;
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    // Load configuration
-    let config = Config::from_env().expect("Failed to load configuration");
-    
-    // Create a database pool
-    let db_pool = PoolBuilder::new()
-        .path(&config.database_path)
-        .journal_mode(JournalMode::Wal)
-        .open()
-        .await
-        .expect("Failed to create database pool");
-
-    // Create application state
-    let app_state = Arc::new(AppState { db_pool });
-
-    // Start the HTTP server
-    let bind_address = format!("{}:{}", config.server_host, config.server_port);
-    HttpServer::new(move || {
-        create_app(app_state.clone())
-    })
-    .bind(bind_address)?
-    .run()
-    .await
-}
-```
-
-### Examples
-
-The repository includes several examples demonstrating different ways to use Memista:
-
-1. **Basic Usage**: Shows how to start a Memista HTTP server (`examples/basic_usage.rs`)
-2. **Library Usage**: Demonstrates direct library usage without starting the HTTP server (`examples/library_usage.rs`)
-3. **Advanced Usage**: Shows a more realistic use case with text processing (`examples/advanced_usage.rs`)
-4. **HTTP Client**: Demonstrates how to interact with a running Memista server using Rust's HTTP client (`examples/http_client.rs`)
-
-To run any example:
-
-```bash
-cargo run --example example_name
-```
-
-See the [examples/README.md](examples/README.md) for more details on each example.
-
-## HTTP API
-
-Memista provides a RESTful HTTP API for vector search operations:
-
-### POST /v1/insert
-
-Insert text chunks with their embeddings into a specified database.
-
-```bash
-curl -X POST http://localhost:8083/v1/insert \
-  -H \"Content-Type: application/json\" \
-  -d '{
-    \"database_id\": \"my_db\",
-    \"chunks\": [{
-      \"embedding\": [0.1, 0.2],
-      \"text\": \"Sample text\",
-      \"metadata\": \"{\\\"source\\\": \\\"document1\\\"}\"
-    }]
-  }'
-```
-
-### POST /v1/search
-
-Search for similar chunks using vector embeddings.
-
-```bash
-curl -X POST http://localhost:8083/v1/search \
-  -H \"Content-Type: application/json\" \
-  -d '{
-    \"database_id\": \"my_db\",
-    \"embeddings\": [[0.1, 0.2]],
-    \"num_results\": 5
-  }'
-```
-
-### DELETE /v1/drop
-
-Drop a specific database and its associated vector index.
-
-```bash
-curl -X DELETE http://localhost:8083/v1/drop \
-  -H \"Content-Type: application/json\" \
-  -d '{
-    \"database_id\": \"my_db\"
-  }'
-```
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/insert` | POST | Store chunks with embeddings |
+| `/v1/search` | POST | Find similar chunks |
+| `/v1/drop` | DELETE | Remove a database |
+| `/openapi.json` | GET | OpenAPI specification |
+| `/swagger-ui/` | GET | Interactive API docs |
 
 ## Configuration
 
-The service can be configured using environment variables:
+```bash
+# Environment variables (or use .env file)
+DATABASE_PATH=memista.db    # SQLite file location
+SERVER_HOST=127.0.0.1       # Bind address
+SERVER_PORT=8083            # Listen port
+LOG_LEVEL=info              # debug|info|warn|error
+```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_PATH` | Path to SQLite database file | `memista.db` |
-| `SERVER_HOST` | Host address to bind to | `127.0.0.1` |
-| `SERVER_PORT` | Port to listen on | `8083` |
-| `LOG_LEVEL` | Logging level (debug, info, warn, error) | `info` |
+## Project Structure
+
+```
+memista/
+├── src/                    # Core library and server
+├── examples/               # Usage examples
+├── benchmarks/             # Performance scripts
+├── documentation/          # MkDocs site
+├── scripts/                # Dev utilities
+└── config/                 # Sample configurations
+```
+
+## Examples
+
+```bash
+cargo run --example basic_usage      # Start server programmatically
+cargo run --example library_usage    # Direct library usage
+cargo run --example advanced_usage   # Document processing pipeline
+cargo run --example http_client      # HTTP client demo
+```
 
 ## Documentation
 
-- [API Documentation](https://docs.rs/memista)
-- [Release Notes](UPDATES_SUMMARY.md)
+**Local docs:**
+```bash
+cd documentation && pip install -r requirements.txt && mkdocs serve
+```
 
-## Performance Considerations
+- [User Guide](documentation/docs/index.md) - Getting started & examples
+- [API Reference](https://docs.rs/memista) - Rust documentation
 
-1. **Embedding Dimensionality**: Currently hardcoded to 2 dimensions. For production use, this should be configurable.
-2. **Index Persistence**: USearch indexes are persisted to disk for durability.
-3. **Connection Pooling**: Uses connection pooling for efficient database access.
-4. **Async I/O**: Fully async implementation for high concurrency.
+## Limitations
 
-## License
+Be aware of these constraints:
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See [LICENSE](LICENSE) for details.
+- **Embedding dimensions**: Currently hardcoded to 2D (demo purposes)
+- **Scale**: Not tested beyond ~100k vectors
+- **Persistence**: Index rebuilds on dimension changes
+- **No auth**: Add a reverse proxy for production
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome! This is an experimental project, so:
+
+1. Open an issue first for major changes
+2. Keep PRs focused and small
+3. Add tests for new functionality
+
+## License
+
+[GPL-3.0](LICENSE) - Free to use, modify, and distribute with same license.
+
+---
+
+<p align="center">
+  <sub>Built with SQLite + USearch + Actix-web</sub>
+</p>

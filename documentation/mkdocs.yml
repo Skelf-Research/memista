@@ -1,10 +1,10 @@
 site_name: Memista Documentation
 site_description: High-performance vector search library combining SQLite and USearch
 site_author: Dipankar Sarkar
-site_url: https://sokratis-xyz.github.io/memista/
+site_url: https://docs.skelfresearch.com/memista/
 
-repo_name: sokratis-xyz/memista
-repo_url: https://github.com/sokratis-xyz/memista
+repo_name: Skelf-Research/memista
+repo_url: https://github.com/Skelf-Research/memista
 edit_uri: edit/main/documentation/docs/
 
 theme:

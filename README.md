@@ -1,3 +1,5 @@
+# memista — vector search for Rust
+
 <p align="center">
   <h1 align="center">Memista</h1>
   <p align="center">A lightweight vector search library for Rust</p>
@@ -9,6 +11,12 @@
   <a href="https://github.com/Skelf-Research/memista/blob/main/LICENSE"><img src="https://img.shields.io/crates/l/memista.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/rust-1.56+-orange.svg" alt="Rust Version">
   <img src="https://img.shields.io/badge/status-experimental-yellow.svg" alt="Status">
+</p>
+
+<p align="center">
+  <a href="https://memista.skelfresearch.com"><b>Website</b></a> •
+  <a href="https://docs.skelfresearch.com/memista">Documentation</a> •
+  <a href="https://skelfresearch.com">Skelf Research</a>
 </p>
 
 ---
@@ -169,3 +177,15 @@ Contributions welcome! This is an experimental project, so:
 <p align="center">
   <sub>Built with SQLite + USearch + Actix-web</sub>
 </p>
+
+---
+
+## Part of Skelf Research
+
+`memista` is built by **[Skelf Research](https://skelfresearch.com)** — an independent UK AI research lab publishing production-grade open-source projects.
+
+🌐 [Website](https://memista.skelfresearch.com) · 📚 [Documentation](https://docs.skelfresearch.com/memista) · 🔬 [All projects](https://skelfresearch.com/projects) · 🤗 [Hugging Face](https://huggingface.co/skelfresearch)
+
+**Related projects:** [embedcache](https://embedcache.skelfresearch.com) (local embedding cache) · [polymathy](https://polymathy.skelfresearch.com) (answer-engine service) · [slorg](https://slorg.skelfresearch.com) (search that thinks first)
+
+<sub>Released under MIT / Apache-2.0. © Skelf Research Limited.</sub>
